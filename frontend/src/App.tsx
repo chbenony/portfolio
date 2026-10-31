@@ -172,7 +172,7 @@ function App() {
           </div>
         </section>
 
-        <section id="contact">
+        <section id="contact" className="contact">
           <p className="section-label">04 / CONTACT</p>
 
           <h2>Let's connect.</h2>
