@@ -61,7 +61,21 @@ jobs:
               with:
                 github-token: ${{ github.token }}
                 script: |
-                  const { summary, comments } = JSON.parse(process.env.CODEX_FINAL_MESSAGE);
+                  let parsed;
+                  try {
+                    parsed = JSON.parse(process.env.CODEX_FINAL_MESSAGE);
+                  } catch (err) {
+                    // Output didn't match the schema; post the raw text so the feedback isn't lost.
+                    core.warning(`Could not parse Codex output as JSON (${err.message}); posting raw text.`);
+                    await github.rest.issues.createComment({
+                       owner: context.repo.owner,
+                       repo: context.repo.repo,
+                       issue_number: context.payload.pull_request.number,
+                       body: process.env.CODEX_FINAL_MESSAGE,
+                    });
+                    return;
+                  }
+                  const { summary, comments } = parsed;
                   const reviewComments = (comments || []).map(({ path, line, body }) => ({ path, line, side: "RIGHT", body }));
 
                   try {
